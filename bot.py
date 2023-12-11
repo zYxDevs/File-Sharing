@@ -39,46 +39,45 @@ async def _startfile(bot, update):
     if len(update.command) != 2:
         return
     code = update.command[1]
-    if '-' in code:
-        msg_id = code.split('-')[-1]
-        # due to new type of file_unique_id, it can contain "-" sign like "agadyruaas-puuo"
-        unique_id = '-'.join(code.split('-')[0:-1])
-
-        if not msg_id.isdigit():
-            return
-        try:  # If message not belong to media group raise exception
-            check_media_group = await bot.get_media_group(TRACK_CHANNEL, int(msg_id))
-            check = check_media_group[0]  # Because func return`s list obj
-        except Exception:
-            check = await bot.get_messages(TRACK_CHANNEL, int(msg_id))
-
-        if check.empty:
-            await update.reply_text('Error: [Message does not exist]\n/help for more details...')
-            return
-        if check.video:
-            unique_idx = check.video.file_unique_id
-        elif check.photo:
-            unique_idx = check.photo.file_unique_id
-        elif check.audio:
-            unique_idx = check.audio.file_unique_id
-        elif check.document:
-            unique_idx = check.document.file_unique_id
-        elif check.sticker:
-            unique_idx = check.sticker.file_unique_id
-        elif check.animation:
-            unique_idx = check.animation.file_unique_id
-        elif check.voice:
-            unique_idx = check.voice.file_unique_id
-        elif check.video_note:
-            unique_idx = check.video_note.file_unique_id
-        if unique_id != unique_idx.lower():
-            return
-        try:  # If message not belong to media group raise exception
-            await bot.copy_media_group(update.from_user.id, TRACK_CHANNEL, int(msg_id))
-        except Exception:
-            await check.copy(update.from_user.id)
-    else:
+    if '-' not in code:
         return
+    msg_id = code.split('-')[-1]
+        # due to new type of file_unique_id, it can contain "-" sign like "agadyruaas-puuo"
+    unique_id = '-'.join(code.split('-')[:-1])
+
+    if not msg_id.isdigit():
+        return
+    try:  # If message not belong to media group raise exception
+        check_media_group = await bot.get_media_group(TRACK_CHANNEL, int(msg_id))
+        check = check_media_group[0]  # Because func return`s list obj
+    except Exception:
+        check = await bot.get_messages(TRACK_CHANNEL, int(msg_id))
+
+    if check.empty:
+        await update.reply_text('Error: [Message does not exist]\n/help for more details...')
+        return
+    if check.video:
+        unique_idx = check.video.file_unique_id
+    elif check.photo:
+        unique_idx = check.photo.file_unique_id
+    elif check.audio:
+        unique_idx = check.audio.file_unique_id
+    elif check.document:
+        unique_idx = check.document.file_unique_id
+    elif check.sticker:
+        unique_idx = check.sticker.file_unique_id
+    elif check.animation:
+        unique_idx = check.animation.file_unique_id
+    elif check.voice:
+        unique_idx = check.voice.file_unique_id
+    elif check.video_note:
+        unique_idx = check.video_note.file_unique_id
+    if unique_id != unique_idx.lower():
+        return
+    try:  # If message not belong to media group raise exception
+        await bot.copy_media_group(update.from_user.id, TRACK_CHANNEL, int(msg_id))
+    except Exception:
+        await check.copy(update.from_user.id)
 
 
 # Help msg
@@ -126,9 +125,7 @@ async def _main_grop(bot, update):
     global media_group_id
     if OWNER_ID == 'all':
         pass
-    elif int(OWNER_ID) == update.from_user.id:
-        pass
-    else:
+    elif int(OWNER_ID) != update.from_user.id:
         return
 
     if int(media_group_id) != int(update.media_group_id):
@@ -147,9 +144,7 @@ async def _main_grop(bot, update):
 async def _main(bot, update):
     if OWNER_ID == 'all':
         pass
-    elif int(OWNER_ID) == update.from_user.id:
-        pass
-    else:
+    elif int(OWNER_ID) != update.from_user.id:
         return
 
     copied = await update.copy(TRACK_CHANNEL)
